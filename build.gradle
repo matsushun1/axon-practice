@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.20'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.20'
@@ -15,6 +17,10 @@ java {
 
 kotlin {
     jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add('-Xjsr305=strict')
+        jvmTarget = JvmTarget.JVM_17
+    }
 }
 
 repositories {
@@ -33,6 +39,9 @@ dependencies {
     // Axon Framework
     implementation 'org.axonframework:axon-spring-boot-starter:4.12.2'
 
+    // Override grpc-netty-shaded to fix CVE-2025-55163
+    implementation 'io.grpc:grpc-netty-shaded:1.75.0'
+
     // H2 Database (for development)
     runtimeOnly 'com.h2database:h2'
 
@@ -46,11 +55,4 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    kotlinOptions {
-        freeCompilerArgs += '-Xjsr305=strict'
-        jvmTarget = '17'
-    }
 }
