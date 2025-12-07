@@ -1,5 +1,7 @@
 plugins {
-    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.20'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.20'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.20'
     id 'org.springframework.boot' version '3.2.0'
     id 'io.spring.dependency-management' version '1.1.4'
 }
@@ -11,30 +13,44 @@ java {
     sourceCompatibility = '17'
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    // Kotlin
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Axon Framework
-    implementation 'org.axonframework:axon-spring-boot-starter:4.9.1'
+    implementation 'org.axonframework:axon-spring-boot-starter:4.12.2'
 
     // H2 Database (for development)
     runtimeOnly 'com.h2database:h2'
 
-    // Lombok (optional, for reducing boilerplate)
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // Jackson for Kotlin
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 
     // Test dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.axonframework:axon-test:4.9.1'
+    testImplementation 'org.axonframework:axon-test:4.12.2'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        freeCompilerArgs += '-Xjsr305=strict'
+        jvmTarget = '17'
+    }
 }
