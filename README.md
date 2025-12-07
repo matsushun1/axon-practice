@@ -5,28 +5,28 @@ Axon FrameworkとSpring Bootを使った商品在庫管理アプリケーショ�
 ## プロジェクト構成
 
 ```
-src/main/java/com/example/inventory/
+src/main/kotlin/com/example/inventory/
 ├── aggregate/          # Aggregate (ビジネスロジックとイベント発行)
-│   └── ProductAggregate.java
+│   └── ProductAggregate.kt
 ├── command/            # Commands (書き込みリクエスト)
-│   ├── CreateProductCommand.java
-│   ├── AddInventoryCommand.java
-│   └── RemoveInventoryCommand.java
+│   ├── CreateProductCommand.kt
+│   ├── AddInventoryCommand.kt
+│   └── RemoveInventoryCommand.kt
 ├── event/              # Events (状態変更を表すイベント)
-│   ├── ProductCreatedEvent.java
-│   ├── InventoryAddedEvent.java
-│   └── InventoryRemovedEvent.java
+│   ├── ProductCreatedEvent.kt
+│   ├── InventoryAddedEvent.kt
+│   └── InventoryRemovedEvent.kt
 ├── query/              # Query側 (読み取り専用モデル)
-│   ├── ProductQueryEntity.java
-│   ├── ProductRepository.java
-│   ├── ProductProjection.java
-│   ├── FindAllProductsQuery.java
-│   └── FindProductByIdQuery.java
+│   ├── ProductQueryEntity.kt
+│   ├── ProductRepository.kt
+│   ├── ProductProjection.kt
+│   ├── FindAllProductsQuery.kt
+│   └── FindProductByIdQuery.kt
 ├── api/                # REST API
-│   ├── ProductController.java
-│   ├── CreateProductRequest.java
-│   └── UpdateInventoryRequest.java
-└── InventoryApplication.java
+│   ├── ProductController.kt
+│   ├── CreateProductRequest.kt
+│   └── UpdateInventoryRequest.kt
+└── InventoryApplication.kt
 ```
 
 ## Axon Frameworkの主要コンセプト
@@ -65,7 +65,7 @@ src/main/java/com/example/inventory/
 # Gradleを使用
 ./gradlew bootRun
 
-# またはIDEから InventoryApplication.java を実行
+# またはIDEから InventoryApplication.kt を実行
 ```
 
 ### 2. API使用例
@@ -307,18 +307,17 @@ flowchart TD
 
 ### コードの重要ポイント
 
-**ProductAggregate.java** が最も重要なファイルです：
+**ProductAggregate.kt** が最も重要なファイルです：
 
 1. **@CommandHandler** - Commandを受け取る入口
-   ```java
+   ```kotlin
    @CommandHandler
-   public ProductAggregate(CreateProductCommand command) {
+   constructor(command: CreateProductCommand) {
        // ビジネスルール検証
-       if (command.getInitialQuantity() < 0) {
-           throw new IllegalArgumentException("初期在庫数は0以上である必要があります");
-       }
+       require(command.initialQuantity >= 0) { "初期在庫数は0以上である必要があります" }
+
        // Eventを発行
-       AggregateLifecycle.apply(new ProductCreatedEvent(...));
+       AggregateLifecycle.apply(ProductCreatedEvent(...))
    }
    ```
 
@@ -327,12 +326,12 @@ flowchart TD
    - 他のコンポーネント（Projection）にEventが配信される
 
 3. **@EventSourcingHandler** - 自分の状態を更新
-   ```java
+   ```kotlin
    @EventSourcingHandler
-   public void on(ProductCreatedEvent event) {
-       this.productId = event.getProductId();
-       this.name = event.getName();
-       this.quantity = event.getInitialQuantity();
+   fun on(event: ProductCreatedEvent) {
+       this.productId = event.productId
+       this.name = event.name
+       this.quantity = event.initialQuantity
    }
    ```
 
